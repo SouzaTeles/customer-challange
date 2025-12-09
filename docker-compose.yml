@@ -13,8 +13,9 @@ services:
       - app-network
 
   php:
-    image: php:8.5-fpm-alpine
-    working_dir: /var/www/backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     volumes:
       - ./backend:/var/www/backend
     networks:
