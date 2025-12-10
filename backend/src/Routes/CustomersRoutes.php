@@ -27,12 +27,12 @@ class CustomersRoutes implements RoutesInterface
                 if ($id) {
                     throw new NotFoundException();
                 }
-                return $controller->save($request->getbodyContent());
+                return $controller->save($request->getBodyContent());
             case HttpMethod::PATCH:
                 if (!$id) {
                     throw new NotFoundException();
                 }
-                return $controller->update($id, $request->getbodyContent());
+                return $controller->update($id, $request->getBodyContent());
             case HttpMethod::DELETE:
                 if (!$id) {
                     throw new NotFoundException();

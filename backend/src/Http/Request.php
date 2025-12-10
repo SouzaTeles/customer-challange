@@ -31,7 +31,7 @@ class Request
         return $this->queryParams;
     }
 
-    public function getbodyContent(): array
+    public function getBodyContent(): array
     {
         return $this->bodyContent;
     }
@@ -59,17 +59,23 @@ class Request
     private function extractParams(string $uri)
     {
         $parsed = parse_url($uri, PHP_URL_QUERY);
+        
         if ($parsed === null) {
             return [];
         }
-        return $parsed;
-
+        
+        $params = [];
+        parse_str($parsed, $params);
+        return $params;
     }
 
     private function extractBodyContent(string $contentType): array
     {
         if ($contentType == 'application/json') {
-            return json_decode(file_get_contents('php://input'), true);
+            $bodyContent = json_decode(file_get_contents('php://input'), true);
+            if ($bodyContent) {
+                return $bodyContent;
+            }
         }
 
         return [];
