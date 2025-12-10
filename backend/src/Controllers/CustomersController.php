@@ -10,7 +10,7 @@ final class CustomersController
     {
     }
 
-    public function save(): void
+    public function save(array $data): void
     {
     }
 
@@ -18,7 +18,7 @@ final class CustomersController
     {
     }
 
-    public function update(string $id): void
+    public function update(string $id, array $data): void
     {
     }
 

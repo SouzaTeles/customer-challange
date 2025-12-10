@@ -7,16 +7,17 @@ namespace App\Routes;
 use App\Controllers\CustomersController;
 use App\Exceptions\NotFoundException;
 use App\Http\HttpMethod;
+use App\Http\Request;
 
-class CustomersRoutes
+class CustomersRoutes implements RoutesInterface
 {
-    public function handleCustomersRoute(array $request): void
+    public function handle(Request $request): ?array
     {
         $controller = new CustomersController();
 
-        $id = $segments[1] ?? null;
+        $id = $request->popSegments();
 
-        switch ($request['method']) {
+        switch ($request->getMethod()) {
             case HttpMethod::GET:
                 if ($id) {
                     return $controller->getById($id);
@@ -26,12 +27,12 @@ class CustomersRoutes
                 if ($id) {
                     throw new NotFoundException();
                 }
-                return $controller->save();
+                return $controller->save($request->getbodyContent());
             case HttpMethod::PATCH:
                 if (!$id) {
                     throw new NotFoundException();
                 }
-                return $controller->update($id);
+                return $controller->update($id, $request->getbodyContent());
             case HttpMethod::DELETE:
                 if (!$id) {
                     throw new NotFoundException();
