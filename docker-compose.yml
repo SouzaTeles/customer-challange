@@ -55,11 +55,12 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./backend/database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
     ports:
       - "3306:3306"
     networks:
       - app-network
-  
+
 networks:
   app-network:
 

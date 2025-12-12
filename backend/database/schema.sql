@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS customers (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(200) NOT NULL,
+    cpf CHAR(11) NOT NULL,
+    birthDate DATE NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    rg VARCHAR(20) NULL,
+    phone VARCHAR(20) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_customers_cpf (cpf),
+    UNIQUE KEY uq_customers_email (email)
+);

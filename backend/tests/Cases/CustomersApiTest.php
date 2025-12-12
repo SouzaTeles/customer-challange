@@ -10,8 +10,9 @@ final class CustomersApiTest extends ApiTestCase
 {
     private $customer = [
         'rg' => 'MG-12.345.678',
-        'cpf' => '12345678901',
+        'cpf' => '99986067057',
         'name' => 'Lucas Teles',
+        'email' => 'email@example.com',
         'phone' => '21999990000',
         'birthDate' => '1990-05-10',
         'addresses' => [
@@ -36,13 +37,12 @@ final class CustomersApiTest extends ApiTestCase
         ],
     ];
 
-public function testApiRoot(): void
-{
-    $res = $this->request('GET', '/api/');
+    public function testApiRoot(): void
+    {
+        $res = $this->request('GET', '/api/');
 
-    $this->assertSame(200, $res['status']);
-}
-
+        $this->assertSame(200, $res['status']);
+    }
 
     public function testCreateCustomer(): void
     {
@@ -53,20 +53,35 @@ public function testApiRoot(): void
         $this->assertArrayHasKey('id', $res['body']);
         $this->assertSame($this->customer['name'], $res['body']['name']);
         $this->assertSame($this->customer['email'], $res['body']['email']);
-        $this->customer['id'] = $res['body']['id'];
+    }
+
+    public function testCreateCustomerFailsWhenEmailAlreadyExists(): void
+    {
+        $this->request('POST', '/api/customers/', $this->customer);
+
+        $res = $this->request('POST', '/api/customers/', $this->customer);
+
+        $this->assertSame(409, $res['status']);
+        $this->assertIsArray($res['body']);
+        $this->assertArrayHasKey('error', $res['body']);
     }
 
     public function testListCustomers(): void
     {
-        $res = $this->request('GET', '/api/customers/');
+        $this->request('POST', '/api/customers/', $this->customer);
 
+        $res = $this->request('GET', '/api/customers/');
         $this->assertSame(200, $res['status']);
         $this->assertIsArray($res['body']);
+        $this->assertNotEmpty($res['body']);
     }
 
     public function testGetCustomerById(): void
     {
-        $res = $this->request('GET', '/api/customers/' . $this->customer['id']);
+        $create = $this->request('POST', '/api/customers/', $this->customer);
+        $id = $create['body']['id'];
+
+        $res = $this->request('GET', '/api/customers/' . $id);
 
         $this->assertSame(200, $res['status']);
         $this->assertSame($this->customer['name'], $res['body']['name']);
@@ -75,23 +90,28 @@ public function testApiRoot(): void
 
     public function testUpdateCustomer(): void
     {
-        $update = $this->request('PATCH', '/api/customers/' . $this->customer['id'], [
+        $create = $this->request('POST', '/api/customers/', $this->customer);
+        $id = $create['body']['id'];
+
+        $update = $this->request('PATCH', '/api/customers/' . $id, [
             'name' => 'Souza Teles',
         ]);
-
         $this->assertSame(200, $update['status']);
         $this->assertSame('Souza Teles', $update['body']['name']);
 
-        $get = $this->request('GET', '/api/customers/' . $this->customer['id']);
+        $get = $this->request('GET', '/api/customers/' . $id);
         $this->assertSame('Souza Teles', $get['body']['name']);
     }
 
     public function testDeleteCustomer(): void
     {
-        $delete = $this->request('DELETE', '/api/customers/' . $this->customer['id']);
+        $create = $this->request('POST', '/api/customers/', $this->customer);
+        $id = $create['body']['id'];
+
+        $delete = $this->request('DELETE', '/api/customers/' . $id);
         $this->assertSame(204, $delete['status']);
 
-        $get = $this->request('GET', '/api/customers/' . $this->customer['id']);
+        $get = $this->request('GET', '/api/customers/' . $id);
         $this->assertSame(404, $get['status']);
     }
 }

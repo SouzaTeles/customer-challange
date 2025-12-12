@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use PHPUnit\Framework\TestCase;
+use App\Database\Database;
+use PDO;
 
 abstract class ApiTestCase extends TestCase
 {
@@ -17,6 +20,8 @@ abstract class ApiTestCase extends TestCase
     {
         parent::setUp();
 
+        $this->cleanupDatabase();
+
         $this->http = new Client([
             'base_uri' => $this->baseUrl,
             'http_errors' => false,
@@ -24,6 +29,17 @@ abstract class ApiTestCase extends TestCase
                 'Accept' => 'application/json',
             ],
         ]);
+    }
+
+    private function cleanupDatabase(): void
+    {
+        try {
+            $db = new Database();
+            $conn = $db->getConnection();
+            $conn->exec("TRUNCATE TABLE customers");
+        } catch (Exception $e) {
+            var_dump( "Error: " . $e->getMessage());
+        }
     }
 
     protected function request(string $method, string $path, ?array $body = null): array

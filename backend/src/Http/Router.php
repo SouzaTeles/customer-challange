@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http;
 
 use App\Exceptions\NotFoundException;
+use DomainException;
+use Exception;
 
 final class Router
 {
@@ -12,20 +14,17 @@ final class Router
     {
         try {
             $route = RouterFactory::create($request->popSegments());
-            $data = $route->handle($request);
-            $this->handleResponse(200, $data);
+            $response = $route->handle($request);
+            $response->send();
         } catch (NotFoundException $e) {
-            $this->handleResponse(404);
+            Response::notFound()->send();
+        } catch (DomainException $e) {
+            Response::json(
+                ['error' => $e->getMessage()],
+                $e->getCode()
+            )->send();
+        } catch (Exception $e) {
+            Response::serverError()->send();
         }
-    }
-
-    private function handleResponse(int $status, ?array $body = null)
-    {
-        http_response_code($status);
-        $response = json_encode($body);
-        if (json_last_error() == JSON_ERROR_NONE) {
-            header('Content-Type: application/json');
-        }
-        echo $response;
     }
 }
