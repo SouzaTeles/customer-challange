@@ -7,10 +7,10 @@ namespace App\Models;
 final class Customer
 {
     private ?string $id;
-    private string $name;
-    private string $cpf;
-    private string $birthDate;
-    private string $email;
+    private ?string $name;
+    private ?string $cpf;
+    private ?string $birthDate;
+    private ?string $email;
     private ?string $rg;
     private ?string $phone;
     private ?array $addresses;
@@ -89,6 +89,11 @@ final class Customer
     public function setId(string $id): Customer
     {
         $this->id = $id;
+
+        if (!empty($this->partialFields)) {
+            $this->partialFields[] = 'id';
+        }
+
         return $this;
     }
 }
