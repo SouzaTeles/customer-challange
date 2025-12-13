@@ -1,0 +1,37 @@
+:root {
+  --color-primary: #184dfd;
+  --color-accent: #ff6500;
+  --color-highlight: #ffdb00;
+
+  --color-bg: #ffffff;
+  --color-text: #0f172a;
+  --color-muted: #64748b;
+
+  font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-weight: 400;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+
+#app {
+  min-height: 100%;
+}
