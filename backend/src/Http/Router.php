@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http;
 
 use App\Exceptions\NotFoundException;
+use App\Exceptions\UnauthorizedException;
 use DomainException;
 use Exception;
 
@@ -18,6 +19,8 @@ final class Router
             $response->send();
         } catch (NotFoundException $e) {
             Response::notFound()->send();
+        } catch (UnauthorizedException $e) {
+            Response::unauthorized($e->getMessage())->send();
         } catch (DomainException $e) {
             Response::json(
                 ['error' => $e->getMessage()],

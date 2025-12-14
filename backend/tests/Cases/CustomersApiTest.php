@@ -37,6 +37,12 @@ final class CustomersApiTest extends ApiTestCase
         ],
     ];
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->authenticate();
+    }
+
     public function testApiRoot(): void
     {
         $res = $this->request('GET', '/api/');

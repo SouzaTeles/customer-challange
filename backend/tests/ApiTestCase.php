@@ -9,6 +9,8 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use PHPUnit\Framework\TestCase;
 use App\Database\Database;
+use App\Repositories\UserRepository;
+use App\Services\UserService;
 use PDO;
 
 abstract class ApiTestCase extends TestCase
@@ -25,9 +27,31 @@ abstract class ApiTestCase extends TestCase
         $this->http = new Client([
             'base_uri' => $this->baseUrl,
             'http_errors' => false,
+            'cookies' => true,
             'headers' => [
                 'Accept' => 'application/json',
             ],
+        ]);
+    }
+
+    protected function authenticate(): void
+    {
+        $db = new Database();
+        $repo = new UserRepository($db);
+        $service = new UserService($repo);
+        
+        $email = 'test@auth.com';
+        $password = '123456';
+        
+        $service->register([
+            'name' => 'Test Auth',
+            'email' => $email,
+            'password' => $password
+        ]);
+
+        $this->request('POST', '/api/auth/login', [
+            'email' => $email,
+            'password' => $password
         ]);
     }
 

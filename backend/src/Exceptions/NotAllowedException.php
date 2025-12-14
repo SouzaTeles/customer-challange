@@ -8,6 +8,8 @@ use RuntimeException;
 
 final class NotAllowedException extends RuntimeException
 {
-	protected $code = 405;
-    protected $message = 'Method Not Allowed';
+    public function __construct(string $message = 'Metodo não permitido')
+    {
+        parent::__construct($message, 405);
+    }
 }

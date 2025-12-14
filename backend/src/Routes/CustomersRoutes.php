@@ -7,6 +7,7 @@ namespace App\Routes;
 use App\Controllers\CustomersController;
 use App\Exceptions\NotAllowedException;
 use App\Exceptions\NotFoundException;
+use App\Http\AuthMiddleware;
 use App\Http\HttpMethod;
 use App\Http\Request;
 use App\Http\Response;
@@ -22,6 +23,8 @@ class CustomersRoutes implements RoutesInterface
 
     public function handle(Request $request): ?Response
     {
+        AuthMiddleware::requireLogin();
+
         $id = $request->popSegments();
 
         switch ($request->getMethod()) {
