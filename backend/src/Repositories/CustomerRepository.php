@@ -24,8 +24,8 @@ class CustomerRepository extends Repository
         unset($data['id']);
         unset($data['addresses']);
 
-        $columns = implode(', ', array_keys($data));
-        $placeholders = ':' . implode(', :', array_keys($data));
+        $columns = $this->getColumns($data);
+        $placeholders = $this->getPlaceholders($data);
 
         $sql = "INSERT INTO {$this->table} ({$columns}) VALUES ({$placeholders})";
         $this->executeQuery($sql, $data);

@@ -52,4 +52,14 @@ abstract class Repository
         $sql = "DELETE FROM {$this->table} WHERE id = :id";
         return $this->executeQuery($sql, ['id' => $id])->rowCount() > 0;
     }
+
+    protected function getPlaceholders(array $data): string
+    {
+        return ':' . implode(', :', array_keys($data));
+    }
+
+    protected function getColumns(array $data): string
+    {
+        return implode(', ', array_keys($data));
+    }
 }

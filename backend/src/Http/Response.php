@@ -60,9 +60,24 @@ class Response
         return new self($statusCode, $data, ['Content-Type' => 'application/json']);
     }
 
+    public static function badRequest(string $errorMessage): self
+    {
+        return new self(400, ['error' => $errorMessage]);
+    }
+
+    public static function unauthorized(string $errorMessage): self
+    {
+        return new self(401, ['error' => $errorMessage]);
+    }
+
     public static function notFound(): self
     {
         return new self(404);
+    }
+
+    public static function created(array $data = []): self
+    {
+        return new self(201, $data);
     }
 
     public static function noContent(): self

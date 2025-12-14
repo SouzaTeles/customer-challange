@@ -37,9 +37,15 @@ abstract class ApiTestCase extends TestCase
             $db = new Database();
             $conn = $db->getConnection();
             $conn->exec("TRUNCATE TABLE customers");
+            $conn->exec("TRUNCATE TABLE users");
         } catch (Exception $e) {
             var_dump( "Error: " . $e->getMessage());
         }
+    }
+
+    protected function tearDown(): void
+    {
+        $this->cleanupDatabase();
     }
 
     protected function request(string $method, string $path, ?array $body = null): array
