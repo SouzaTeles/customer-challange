@@ -21,32 +21,38 @@ class CustomersRoutes implements RoutesInterface
         $this->controller = $controller;
     }
 
+    private function getNumericId(?string $segment): int
+    {
+        if (ctype_digit($segment)) {
+            return (int) $segment;
+        }
+
+        throw new NotFoundException();
+    }
+
     public function handle(Request $request): ?Response
     {
         AuthMiddleware::requireLogin();
 
-        $id = $request->popSegments();
+        $segment = $request->popSegments();
 
         switch ($request->getMethod()) {
             case HttpMethod::GET:
-                if ($id) {
+                if ($segment) {
+                    $id = $this->getNumericId($segment);
                     return $this->controller->getById($id);
                 }
                 return $this->controller->get();
             case HttpMethod::POST:
-                if ($id) {
+                if ($segment) {
                     throw new NotFoundException();
                 }
                 return $this->controller->save($request->getBodyContent());
-            case HttpMethod::PATCH:
-                if (!$id) {
-                    throw new NotFoundException();
-                }
+            case HttpMethod::PUT:
+                $id = $this->getNumericId($segment);
                 return $this->controller->update($id, $request->getBodyContent());
             case HttpMethod::DELETE:
-                if (!$id) {
-                    throw new NotFoundException();
-                }
+                $id = $this->getNumericId($segment);
                 return $this->controller->delete($id);
             default:
                 throw new NotAllowedException();

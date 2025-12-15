@@ -99,9 +99,10 @@ final class CustomersApiTest extends ApiTestCase
         $create = $this->request('POST', '/api/customers/', $this->customer);
         $id = $create['body']['id'];
 
-        $update = $this->request('PATCH', '/api/customers/' . $id, [
-            'name' => 'Souza Teles',
-        ]);
+        $updatedData = $this->customer;
+        $updatedData['name'] = 'Souza Teles';
+
+        $update = $this->request('PUT', '/api/customers/' . $id, $updatedData);
         $this->assertSame(200, $update['status']);
         $this->assertSame('Souza Teles', $update['body']['name']);
 

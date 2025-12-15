@@ -22,7 +22,10 @@ class Request
         $this->method = $server['REQUEST_METHOD'];
         $this->headers = getallheaders() ?: [];
         $this->segments = $this->extractSegments($path);
-        $this->bodyContent = $this->extractBodyContent($server['CONTENT_TYPE']);
+        
+        $contentType = $server['CONTENT_TYPE'] ?? '';
+        $this->bodyContent = $this->extractBodyContent($contentType);
+        
         $this->queryParams = $this->extractParams($server['REQUEST_URI']);
     }
 

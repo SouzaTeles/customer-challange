@@ -60,10 +60,19 @@ abstract class ApiTestCase extends TestCase
         try {
             $db = new Database();
             $conn = $db->getConnection();
-            $conn->exec("TRUNCATE TABLE customers");
-            $conn->exec("TRUNCATE TABLE users");
+            $conn->exec("SET FOREIGN_KEY_CHECKS = 0");
+            $conn->exec("DELETE FROM addresses");
+            $conn->exec("DELETE FROM customers");
+            $conn->exec("DELETE FROM users");
+            $conn->exec("ALTER TABLE addresses AUTO_INCREMENT = 1");
+            $conn->exec("ALTER TABLE customers AUTO_INCREMENT = 1");
+            $conn->exec("ALTER TABLE users AUTO_INCREMENT = 1");
         } catch (Exception $e) {
             var_dump( "Error: " . $e->getMessage());
+        } finally {
+            if (isset($conn)) {
+                $conn->exec("SET FOREIGN_KEY_CHECKS = 1");
+            }
         }
     }
 

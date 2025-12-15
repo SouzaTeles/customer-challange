@@ -6,58 +6,54 @@ namespace App\Controllers;
 
 use App\Exceptions\NotFoundException;
 use App\Http\Response;
-use App\Models\Customer;
-use App\Repositories\CustomerRepository;
+use App\Services\CustomerService;
 
 final class CustomersController
 {
-    private CustomerRepository $repository;
+    private CustomerService $service;
 
-    public function __construct(CustomerRepository $repository)
+    public function __construct(CustomerService $service)
     {
-        $this->repository = $repository;
+        $this->service = $service;
     }
 
     public function get(): Response
     {
-        return Response::json($this->repository->findAll());
+        $customers = $this->service->getAll();
+        return Response::json($customers);
     }
 
     public function save(array $data): Response
     {
-        $customer = Customer::fromArray($data);
-
-        $created = $this->repository->create($customer);
-
-        return Response::json($created->toArray(), 201);
+        $created = $this->service->create($data);
+        return Response::created($created->toArray());
     }
 
-    public function getById(string $id): Response
+    public function getById(int $id): Response
     {
-        $found = $this->repository->findById($id);
+        $found = $this->service->findById($id);
 
-        if ($found === false || $found === null) {
+        if ($found === null) {
             throw new NotFoundException();
         }
 
-        return Response::json($found);
+        return Response::json($found->toArray());
     }
 
-    public function update(string $id, array $data): Response
+    public function update(int $id, array $data): Response
     {
-        $customer = Customer::fromArrayToUpdate($data)->setId($id);
-        $updated = $this->repository->update($customer);
+        $updated = $this->service->update($id, $data);
 
         if ($updated === null) {
             throw new NotFoundException();
         }
 
-        return Response::json($updated);
+        return Response::json($updated->toArray());
     }
 
-    public function delete(string $id): Response
+    public function delete(int $id): Response
     {
-        $deleted = $this->repository->delete($id);
+        $deleted = $this->service->delete($id);
 
         if (!$deleted) {
             throw new NotFoundException();

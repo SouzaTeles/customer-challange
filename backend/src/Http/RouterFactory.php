@@ -9,10 +9,12 @@ use App\Controllers\CustomersController;
 use App\Controllers\AuthController;
 use App\Routes\CustomersRoutes;
 use App\Routes\AuthRoutes;
+use App\Repositories\AddressRepository;
 use App\Repositories\CustomerRepository;
 use App\Repositories\UserRepository;
 use App\Exceptions\NotFoundException;
 use App\Routes\RoutesInterface;
+use App\Services\CustomerService;
 use App\Services\UserService;
 
 class RouterFactory
@@ -43,8 +45,10 @@ class RouterFactory
     private static function createCustomersRoutesInstance(): CustomersRoutes
     {
         $database = new Database();
-        $repository = new CustomerRepository($database);
-        $controller = new CustomersController($repository);
+        $addressRepository = new AddressRepository($database);
+        $customerRepository = new CustomerRepository($database);
+        $service = new CustomerService($customerRepository, $addressRepository);
+        $controller = new CustomersController($service);
         return new CustomersRoutes($controller);
     }
 }

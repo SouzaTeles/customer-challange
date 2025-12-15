@@ -4,27 +4,29 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Address;
+
 final class Customer
 {
-    private ?string $id;
+    private ?int $id;
     private ?string $name;
     private ?string $cpf;
     private ?string $birthDate;
     private ?string $email;
     private ?string $rg;
     private ?string $phone;
-    private ?array $addresses;
-    private array $partialFields;
+    /** @var Address[] */
+    private array $addresses;
 
     public function __construct(
-        ?string $id,
+        ?int $id,
         ?string $name,
         ?string $cpf,
         ?string $birthDate,
         ?string $email,
         ?string $rg = null,
         ?string $phone = null,
-        ?array $addresses = []
+        array $addresses = []
     ) {
         $this->id = $id;
         $this->name = $name;
@@ -38,6 +40,17 @@ final class Customer
 
     public static function fromArray(array $data): self
     {
+        $addresses = [];
+        if (isset($data['addresses'])) {
+            foreach ($data['addresses'] as $addrData) {
+                if ($addrData instanceof Address) {
+                    $addresses[] = $addrData;
+                } else {
+                    $addresses[] = Address::fromArray($addrData);
+                }
+            }
+        }
+
         return new self(
             $data['id'] ?? null,
             $data['name'] ?? null,
@@ -46,26 +59,15 @@ final class Customer
             $data['email'] ?? null,
             $data['rg'] ?? null,
             $data['phone'] ?? null,
-            $data['addresses'] ?? []
+            $addresses
         );
-    }
-
-
-    public function setPartialFields(array $partialFields): void
-    {
-        $this->partialFields = $partialFields;
-    }
-
-    public static function fromArrayToUpdate(array $data): self
-    {
-        $instance = self::fromArray($data);
-        $instance->setPartialFields(array_keys($data));
-        return $instance;
     }
 
     public function toArray(): array
     {
-        $values = [
+        $addressesArray = array_map(fn(Address $a) => $a->toArray(), $this->addresses);
+
+        return [
             'id' => $this->id,
             'name' => $this->name,
             'cpf' => $this->cpf,
@@ -73,27 +75,32 @@ final class Customer
             'email' => $this->email,
             'rg' => $this->rg,
             'phone' => $this->phone,
-            'addresses' => $this->addresses,
+            'addresses' => $addressesArray,
         ];
-
-        if (!empty($this->partialFields)) {
-            $values = array_intersect_key(
-                $values,
-                array_flip($this->partialFields)
-            );
-        }
-
-        return $values;
     }
 
-    public function setId(string $id): Customer
+    public function getAddresses(): array
+    {
+        return $this->addresses;
+    }
+
+    /**
+     * @param Address[] $addresses
+     */
+    public function setAddresses(array $addresses): self
+    {
+        $this->addresses = $addresses;
+        return $this;
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function setId(int $id): Customer
     {
         $this->id = $id;
-
-        if (!empty($this->partialFields)) {
-            $this->partialFields[] = 'id';
-        }
-
         return $this;
     }
 }

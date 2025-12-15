@@ -21,6 +21,7 @@ class CustomerRepository extends Repository
     public function create(Customer $customer): Customer
     {
         $data = $customer->toArray();
+        
         unset($data['id']);
         unset($data['addresses']);
 
@@ -30,13 +31,18 @@ class CustomerRepository extends Repository
         $sql = "INSERT INTO {$this->table} ({$columns}) VALUES ({$placeholders})";
         $this->executeQuery($sql, $data);
 
-        $customer->setId($this->db->lastInsertId());
+        $customerId = (int)$this->db->lastInsertId();
+        $customer->setId($customerId);
+
         return $customer;
     }
 
-    public function update(Customer $customer): ?array
+    public function update(Customer $customer): Customer
     {
         $data = $customer->toArray();
+        $id = $data['id'];
+
+        unset($data['addresses'], $data['id']);
 
         $sets = [];
         foreach (array_keys($data) as $key) {
@@ -44,9 +50,29 @@ class CustomerRepository extends Repository
         }
 
         $sql = "UPDATE {$this->table} SET " . implode(', ', $sets) . " WHERE id = :id";
-
+        
+        $data['id'] = $id;
         $this->executeQuery($sql, $data);
-        return $this->findById($data['id']);
+        
+        return $customer;
+    }
+
+    public function findById($id): ?Customer
+    {
+        $row = parent::findById($id);
+
+        if (!$row) {
+            return null;
+        }
+
+        return Customer::fromArray($row);
+    }
+
+    public function findAll(): array
+    {
+        $rows = parent::findAll();
+        
+        return array_map(fn($row) => Customer::fromArray($row), $rows);
     }
 
     protected function handleDuplicateEntry(string $message): void
