@@ -33,12 +33,13 @@ class CustomerService
         
         $customerId = (int)$createdCustomer->getId();
 
+        $newAddresses = [];
         foreach ($customer->getAddresses() as $address) {
             $address->setCustomerId($customerId);
-            $this->addressRepository->create($address);
+            $newAddresses[] = $this->addressRepository->create($address);
         }
         
-        $createdCustomer->setAddresses($customer->getAddresses());
+        $createdCustomer->setAddresses($newAddresses);
 
         return $createdCustomer;
     }

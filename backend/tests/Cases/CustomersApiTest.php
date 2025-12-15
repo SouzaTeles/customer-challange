@@ -59,6 +59,15 @@ final class CustomersApiTest extends ApiTestCase
         $this->assertArrayHasKey('id', $res['body']);
         $this->assertSame($this->customer['name'], $res['body']['name']);
         $this->assertSame($this->customer['email'], $res['body']['email']);
+        
+        $this->assertArrayHasKey('addresses', $res['body']);
+        $this->assertIsArray($res['body']['addresses']);
+        $this->assertCount(2, $res['body']['addresses']);
+        
+        foreach ($res['body']['addresses'] as $address) {
+            $this->assertArrayHasKey('id', $address);
+            $this->assertIsInt($address['id']);
+        }
     }
 
     public function testCreateCustomerFailsWhenEmailAlreadyExists(): void
@@ -105,6 +114,16 @@ final class CustomersApiTest extends ApiTestCase
         $update = $this->request('PUT', '/api/customers/' . $id, $updatedData);
         $this->assertSame(200, $update['status']);
         $this->assertSame('Souza Teles', $update['body']['name']);
+        
+        $this->assertArrayHasKey('addresses', $update['body']);
+        $this->assertIsArray($update['body']['addresses']);
+        $this->assertCount(2, $update['body']['addresses']);
+        
+        foreach ($update['body']['addresses'] as $address) {
+            $this->assertArrayHasKey('id', $address);
+            $this->assertIsInt($address['id']);
+            $this->assertGreaterThan(0, $address['id']);
+        }
 
         $get = $this->request('GET', '/api/customers/' . $id);
         $this->assertSame('Souza Teles', $get['body']['name']);
