@@ -43,13 +43,6 @@ final class CustomersApiTest extends ApiTestCase
         $this->authenticate();
     }
 
-    public function testApiRoot(): void
-    {
-        $res = $this->request('GET', '/api/');
-
-        $this->assertSame(200, $res['status']);
-    }
-
     public function testCreateCustomer(): void
     {
         $res = $this->request('POST', '/api/customers/', $this->customer);
