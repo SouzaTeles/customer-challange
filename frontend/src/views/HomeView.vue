@@ -2,12 +2,18 @@
 import { ref, onMounted } from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
 import CustomerForm from '@/components/CustomerForm.vue'
+import Modal from '@/components/Modal.vue'
 import { customerService } from '@/services/customer.js'
+import { getErrorMessage } from '@/utils/errorHandler.js'
 
 const customers = ref([])
 const loading = ref(false)
 const searchTerm = ref('')
 const showCustomerForm = ref(false)
+const showDeleteModal = ref(false)
+const customerToDelete = ref(null)
+const deleteError = ref('')
+const deleting = ref(false)
 
 const fetchCustomers = async () => {
   loading.value = true
@@ -22,6 +28,35 @@ const fetchCustomers = async () => {
 
 const handleCustomerSaved = () => {
   fetchCustomers()
+}
+
+const openDeleteModal = (customer) => {
+  customerToDelete.value = customer
+  deleteError.value = ''
+  showDeleteModal.value = true
+}
+
+const closeDeleteModal = () => {
+  showDeleteModal.value = false
+  customerToDelete.value = null
+  deleteError.value = ''
+}
+
+const confirmDelete = async () => {
+  if (!customerToDelete.value) return
+  
+  deleteError.value = ''
+  deleting.value = true
+  
+  try {
+    await customerService.delete(customerToDelete.value.id)
+    closeDeleteModal()
+    fetchCustomers()
+  } catch (error) {
+    deleteError.value = getErrorMessage(error, 'Erro ao excluir cliente')
+  } finally {
+    deleting.value = false
+  }
 }
 
 onMounted(() => {
@@ -67,7 +102,7 @@ onMounted(() => {
                 <td>{{ customer.email }}</td>
                 <td>
                   <button class="btn btn--icon">Editar</button>
-                  <button class="btn btn--icon btn--danger">Excluir</button>
+                  <button class="btn btn--icon btn--danger" @click="openDeleteModal(customer)">Excluir</button>
                 </td>
               </tr>
             </tbody>
@@ -81,6 +116,27 @@ onMounted(() => {
       @close="showCustomerForm = false"
       @saved="handleCustomerSaved"
     />
+
+    <Modal
+      :isOpen="showDeleteModal"
+      title="Confirmar Exclusão"
+      type="danger"
+      :confirmText="deleting ? 'Excluindo...' : 'Excluir'"
+      cancelText="Cancelar"
+      @update:isOpen="showDeleteModal = $event"
+      @confirm="confirmDelete"
+      @cancel="closeDeleteModal"
+    >
+      <p class="delete-modal__message">
+        Tem certeza que deseja excluir o cliente <strong>{{ customerToDelete?.name }}</strong>?
+      </p>
+      <p class="delete-modal__warning">
+        Esta ação não pode ser desfeita.
+      </p>
+      <div v-if="deleteError" class="delete-modal__error">
+        {{ deleteError }}
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -182,6 +238,28 @@ onMounted(() => {
     td {
       color: var(--color-text);
     }
+  }
+}
+
+.delete-modal {
+  &__message {
+    margin: 0;
+    color: var(--color-text);
+  }
+
+  &__warning {
+    margin: 16px 0 0 0;
+    color: var(--color-text-muted);
+    font-size: 14px;
+  }
+
+  &__error {
+    margin-top: 16px;
+    padding: 12px;
+    background-color: rgba(239, 68, 68, 0.1);
+    border-radius: 4px;
+    color: var(--color-danger);
+    font-size: 14px;
   }
 }
 </style>
