@@ -1,7 +1,29 @@
 <script setup>
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import iconLogOff from '../assets/icons/log-off.svg'
+import Modal from './Modal.vue'
+import { authService } from '@/services/auth.js'
 
-const title = 'Customer Challenge'
+const showLogoffModal = ref(false)
+const router = useRouter()
+
+const user = computed(() => authService.getUser())
+const userName = computed(() => user.value?.name || 'Usuário')
+const userInitials = computed(() => {
+    const name = userName.value
+    const parts = name.split(' ')
+    if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase()
+    }
+    return name.substring(0, 2).toUpperCase()
+})
+
+const handleLogoff = async () => {
+    await authService.logout()
+    showLogoffModal.value = false
+    router.push('/login')
+}
 </script>
 
 <template>
@@ -18,15 +40,24 @@ const title = 'Customer Challenge'
 
         <div class="sidebar__footer">
             <div class="sidebar__user">
-                <div class="sidebar__userAvatar">AD</div>
+                <div class="sidebar__userAvatar">{{ userInitials }}</div>
                 <div class="sidebar__userInfo">
-                    <span class="sidebar__userName">Admin User</span>
+                    <span class="sidebar__userName">{{ userName }}</span>
                 </div>
             </div>
-            <button class="sidebar__logoff" title="Sair">
+            <button class="sidebar__logoff" title="Sair" @click="showLogoffModal = true">
                 <img :src="iconLogOff" alt="Sair" />
             </button>
         </div>
+
+        <Modal
+            v-model:isOpen="showLogoffModal"
+            title="Sair do Sistema"
+            message="Tem certeza que deseja sair do sistema?"
+            confirmText="Sair"
+            type="danger"
+            @confirm="handleLogoff"
+        />
     </aside>
 </template>
 
@@ -41,100 +72,100 @@ const title = 'Customer Challenge'
     display: flex;
     flex-direction: column;
     gap: 18px;
-}
 
-.sidebar__brand {
-    display: flex;
-    align-items: center;
-    padding: 8px 10px;
-}
+    &__brand {
+        display: flex;
+        align-items: center;
+        padding: 8px 10px;
+    }
 
-.sidebar__title {
-    font-weight: 700;
-    font-size: 14px;
-}
+    &__title {
+        font-weight: 700;
+        font-size: 14px;
+    }
 
-.sidebar__nav {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
+    &__nav {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
 
-.sidebar__link {
-    display: flex;
-    align-items: center;
-    height: 40px;
-    padding: 0 10px;
-    border-radius: 10px;
-    color: white;
-    text-decoration: none;
-}
+    &__link {
+        display: flex;
+        align-items: center;
+        height: 40px;
+        padding: 0 10px;
+        border-radius: 10px;
+        color: white;
+        text-decoration: none;
 
-.sidebar__link.is-active {
-    background: white;
-    color: var(--color-primary);
-}
+        &.is-active {
+            background: white;
+            color: var(--color-primary);
+        }
+    }
 
-.sidebar__linkLabel {
-    font-size: 14px;
-    font-weight: 600;
-}
+    &__linkLabel {
+        font-size: 14px;
+        font-weight: 600;
+    }
 
-.sidebar__footer {
-    margin-top: auto;
-    padding-top: 18px;
-    border-top: 1px solid color-mix(in srgb, white 20%, transparent);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-}
+    &__footer {
+        margin-top: auto;
+        padding-top: 18px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
 
-.sidebar__user {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
+    &__user {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
-.sidebar__userAvatar {
-    width: 36px;
-    height: 36px;
-    background: white;
-    color: var(--color-primary);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 14px;
-}
+    &__userAvatar {
+        width: 36px;
+        height: 36px;
+        background: white;
+        color: var(--color-primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+    }
 
-.sidebar__userInfo {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.2;
-}
+    &__userInfo {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+    }
 
-.sidebar__userName {
-    font-size: 13px;
-    font-weight: 600;
-}
+    &__userName {
+        font-size: 13px;
+        font-weight: 600;
+    }
 
-.sidebar__logoff {
-    background: transparent;
-    border: none;
-    color: white;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: .2s;
-    opacity: 0.8;
+    &__logoff {
+        background: transparent;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: .2s;
+        opacity: 0.8;
 
-    &:hover {
-        background: #FFFFFF26;
+        &:hover {
+            background: #FFFFFF26;
+        }
     }
 }
 </style>

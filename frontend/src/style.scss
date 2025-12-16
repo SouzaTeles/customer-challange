@@ -2,10 +2,17 @@
   --color-primary: #184dfd;
   --color-accent: #ff6500;
   --color-highlight: #ffdb00;
+  --color-danger: #ef4444;
+  --color-danger-hover: #dc2626;
 
   --color-bg: #ffffff;
+  --color-bg-secondary: #f1f5f9;
   --color-text: #0f172a;
+  --color-text-muted: #64748b;
   --color-muted: #64748b;
+
+  --color-border: #cbd5e1;
+  --color-border-hover: #94a3b8;
 
   font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-weight: 400;
@@ -34,4 +41,59 @@ a {
 
 #app {
   min-height: 100%;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+
+  &--primary {
+    background-color: var(--color-primary);
+    color: white;
+
+    &:hover {
+      filter: brightness(110%);
+    }
+  }
+
+  &--secondary {
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+
+    &:hover {
+      background-color: var(--color-bg-secondary);
+      border-color: var(--color-border-hover);
+    }
+  }
+
+  &--icon {
+    padding: 6px 12px;
+    font-size: 13px;
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text);
+    margin-right: 8px;
+
+    &:hover {
+      background-color: var(--color-border);
+    }
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  &--danger {
+    background-color: var(--color-danger);
+    color: white;
+
+    &:hover {
+      background-color: var(--color-danger-hover);
+    }
+  }
 }

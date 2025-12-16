@@ -23,7 +23,8 @@ class CustomerService
 
     public function getAll(): array
     {
-        return $this->customerRepository->findAll();
+        $customers = $this->customerRepository->findAll();
+        return array_map(fn($customer) => $customer->toArray(), $customers);
     }
 
     public function create(array $data): Customer

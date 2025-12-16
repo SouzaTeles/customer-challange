@@ -87,4 +87,3 @@ docker-compose exec php ./vendor/bin/phpunit
 - Validação de dados (CPF, email, CEP)
 - Paginação na listagem
 - Rate limiting no login
-e
