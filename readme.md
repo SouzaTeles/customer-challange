@@ -14,7 +14,7 @@ docker-compose up -d
 
 2. Crie um usuário:
 ```bash
-docker-compose exec php php create_user.php "Seu Nome" "seu@email.com" "senha123"
+docker-compose exec php php scripts/create_user.php "Seu Nome" "seu@email.com" "senha123"
 ```
 
 3. Acesse:

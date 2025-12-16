@@ -12,16 +12,14 @@ if (php_sapi_name() !== 'cli') {
     die("Execução permitida apenas em CLI." . PHP_EOL);
 }
 
-// CONFIGURAÇÃO DO NOVO USUÁRIO
-// Altere os dados abaixo conforme necessário
 $userData = [
-    'name' => 'Admin User',
-    'email' => 'admin@example.com',
-    'password' => 'secret123',
+    'name' => $argv[1],
+    'email' => $argv[2],
+    'password' => $argv[3],
     'role' => 'admin'
 ];
 
-echo "=== Criação de Usuário (Modo Script) ===" . PHP_EOL;
+echo "=== Criação de Usuário ===" . PHP_EOL;
 
 try {
     $database = new Database();
