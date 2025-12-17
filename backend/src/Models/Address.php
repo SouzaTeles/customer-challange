@@ -4,8 +4,17 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Exceptions\ValidationException;
+use App\Utils\Validator;
+
 final class Address
 {
+    private const VALID_STATES = [
+        'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
+        'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN',
+        'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+    ];
+
     public function __construct(
         private ?int $id,
         private int $customerId,
@@ -64,5 +73,42 @@ final class Address
     {
         $this->customerId = $customerId;
         return $this;
+    }
+
+    public function validate(): void
+    {
+        $errors = [];
+
+        if (empty($this->street)) {
+            $errors['street'] = 'Rua é obrigatória';
+        }
+
+        if (empty($this->number)) {
+            $errors['number'] = 'Número é obrigatório';
+        }
+
+        if (empty($this->neighborhood)) {
+            $errors['neighborhood'] = 'Bairro é obrigatório';
+        }
+
+        if (empty($this->zipCode)) {
+            $errors['zipCode'] = 'CEP é obrigatório';
+        } elseif (!Validator::isValidCep($this->zipCode)) {
+            $errors['zipCode'] = 'CEP inválido';
+        }
+
+        if (empty($this->city)) {
+            $errors['city'] = 'Cidade é obrigatória';
+        }
+
+        if (empty($this->state)) {
+            $errors['state'] = 'Estado é obrigatório';
+        } elseif (!in_array(strtoupper($this->state), self::VALID_STATES, true)) {
+            $errors['state'] = 'Estado inválido';
+        }
+
+        if (!empty($errors)) {
+            throw new ValidationException('Dados inválidos', $errors);
+        }
     }
 }

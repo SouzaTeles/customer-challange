@@ -18,8 +18,7 @@ docker-compose exec php php scripts/create_user.php "Seu Nome" "seu@email.com" "
 ```
 
 3. Acesse:
-- Frontend: http://localhost:5173
-- API: http://localhost/api
+- http://localhost:80
 
 ## Rodar testes
 
@@ -107,5 +106,5 @@ docker-compose exec php ./vendor/bin/phpunit
 
 - Paginação na listagem
 - Rate limiting no login
-- Validação de email e CEP no backend
+- Validação de email e CPF no backend (melhoria de middlewares)
 - Testes de unidade

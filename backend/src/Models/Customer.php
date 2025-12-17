@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Address;
+use App\Exceptions\ValidationException;
+use App\Utils\Validator;
 
 final class Customer
 {
@@ -103,4 +105,55 @@ final class Customer
         $this->id = $id;
         return $this;
     }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function getCpf(): ?string
+    {
+        return $this->cpf;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function validate(): void
+    {
+        $errors = [];
+
+        if (empty($this->name)) {
+            $errors['name'] = 'Nome é obrigatório';
+        }
+
+        if (empty($this->cpf)) {
+            $errors['cpf'] = 'CPF é obrigatório';
+        } elseif (!Validator::isValidCpf($this->cpf)) {
+            $errors['cpf'] = 'CPF inválido';
+        }
+
+        if (empty($this->email)) {
+            $errors['email'] = 'Email é obrigatório';
+        } elseif (!Validator::isValidEmail($this->email)) {
+            $errors['email'] = 'Email inválido';
+        }
+
+        if (empty($this->birthDate)) {
+            $errors['birthDate'] = 'Data de nascimento é obrigatória';
+        } elseif (!Validator::isValidDate($this->birthDate)) {
+            $errors['birthDate'] = 'Data de nascimento inválida';
+        }
+
+        if (!empty($this->phone) && !Validator::isValidPhone($this->phone)) {
+            $errors['phone'] = 'Telefone inválido';
+        }
+
+        if (!empty($errors)) {
+            throw new ValidationException('Dados inválidos', $errors);
+        }
+    }
+
 }

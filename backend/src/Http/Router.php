@@ -6,6 +6,7 @@ namespace App\Http;
 
 use App\Exceptions\NotFoundException;
 use App\Exceptions\UnauthorizedException;
+use App\Exceptions\ValidationException;
 use DomainException;
 use Exception;
 
@@ -17,6 +18,11 @@ final class Router
             $route = RouterFactory::create($request->popSegments());
             $response = $route->handle($request);
             $response->send();
+        } catch (ValidationException $e) {
+            Response::badRequest(
+                $e->getMessage(),
+                $e->getErrors()
+            )->send();
         } catch (NotFoundException $e) {
             Response::notFound()->send();
         } catch (UnauthorizedException $e) {

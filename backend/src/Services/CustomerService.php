@@ -36,6 +36,7 @@ class CustomerService
     public function create(array $data): Customer
     {
         $customer = Customer::fromArray($data);
+        $customer->validate();
         $createdCustomer = $this->customerRepository->create($customer);
         
         $customerId = (int)$createdCustomer->getId();
@@ -71,6 +72,7 @@ class CustomerService
         }
         
         $customer = Customer::fromArray($data)->setId($id);
+        $customer->validate();
         
         $updatedCustomer = $this->customerRepository->update($customer);
 

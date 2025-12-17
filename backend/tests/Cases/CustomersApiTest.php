@@ -139,13 +139,13 @@ final class CustomersApiTest extends ApiTestCase
         $customer1 = $this->customer;
         $customer1['name'] = 'João Silva';
         $customer1['email'] = 'joao@example.com';
-        $customer1['cpf'] = '12345678901';
+        $customer1['cpf'] = '12345678909';
         $this->request('POST', '/api/customers/', $customer1);
 
         $customer2 = $this->customer;
         $customer2['name'] = 'Maria Santos';
         $customer2['email'] = 'maria@example.com';
-        $customer2['cpf'] = '98765432100';
+        $customer2['cpf'] = '52998224725';
         $this->request('POST', '/api/customers/', $customer2);
 
         $searchByName = $this->request('GET', '/api/customers/?search=João');
