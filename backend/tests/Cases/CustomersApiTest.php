@@ -133,4 +133,42 @@ final class CustomersApiTest extends ApiTestCase
         $get = $this->request('GET', '/api/customers/' . $id);
         $this->assertSame(404, $get['status']);
     }
+
+    public function testSearchCustomers(): void
+    {
+        $customer1 = $this->customer;
+        $customer1['name'] = 'João Silva';
+        $customer1['email'] = 'joao@example.com';
+        $customer1['cpf'] = '12345678901';
+        $this->request('POST', '/api/customers/', $customer1);
+
+        $customer2 = $this->customer;
+        $customer2['name'] = 'Maria Santos';
+        $customer2['email'] = 'maria@example.com';
+        $customer2['cpf'] = '98765432100';
+        $this->request('POST', '/api/customers/', $customer2);
+
+        $searchByName = $this->request('GET', '/api/customers/?search=João');
+        $this->assertSame(200, $searchByName['status']);
+        $this->assertIsArray($searchByName['body']);
+        $this->assertNotEmpty($searchByName['body']);
+        $this->assertSame('João Silva', $searchByName['body'][0]['name']);
+
+        $searchByEmail = $this->request('GET', '/api/customers/?search=maria@example');
+        $this->assertSame(200, $searchByEmail['status']);
+        $this->assertIsArray($searchByEmail['body']);
+        $this->assertNotEmpty($searchByEmail['body']);
+        $this->assertSame('Maria Santos', $searchByEmail['body'][0]['name']);
+
+        $searchByCpf = $this->request('GET', '/api/customers/?search=123456');
+        $this->assertSame(200, $searchByCpf['status']);
+        $this->assertIsArray($searchByCpf['body']);
+        $this->assertNotEmpty($searchByCpf['body']);
+        $this->assertSame('João Silva', $searchByCpf['body'][0]['name']);
+
+        $searchNoResults = $this->request('GET', '/api/customers/?search=NaoExiste');
+        $this->assertSame(200, $searchNoResults['status']);
+        $this->assertIsArray($searchNoResults['body']);
+        $this->assertEmpty($searchNoResults['body']);
+    }
 }
