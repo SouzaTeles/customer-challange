@@ -32,9 +32,17 @@ const handleCustomerSaved = () => {
   fetchCustomers()
 }
 
-const openEditForm = (customer) => {
-  customerToEdit.value = customer
-  showCustomerForm.value = true
+const openEditForm = async (customer) => {
+  try {
+    loading.value = true
+    const fullCustomer = await customerService.getById(customer.id)
+    customerToEdit.value = fullCustomer
+    showCustomerForm.value = true
+  } catch (error) {
+    console.error('Erro ao buscar cliente:', error)
+  } finally {
+    loading.value = false
+  }
 }
 
 const closeCustomerForm = () => {

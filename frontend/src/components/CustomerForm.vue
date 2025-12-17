@@ -22,6 +22,7 @@ const birthDate = ref('')
 const email = ref('')
 const rg = ref('')
 const phone = ref('')
+const addresses = ref([])
 const loading = ref(false)
 const error = ref('')
 
@@ -35,8 +36,25 @@ watch(() => props.customer, (customer) => {
     email.value = customer.email || ''
     rg.value = customer.rg || ''
     phone.value = customer.phone || ''
+    addresses.value = customer.addresses || []
   }
 }, { immediate: true })
+
+const addAddress = () => {
+  addresses.value.push({
+    street: '',
+    number: '',
+    complement: '',
+    neighborhood: '',
+    zipCode: '',
+    city: '',
+    state: ''
+  })
+}
+
+const removeAddress = (index) => {
+  addresses.value.splice(index, 1)
+}
 
 const handleSubmit = async () => {
   error.value = ''
@@ -49,7 +67,8 @@ const handleSubmit = async () => {
       birthDate: birthDate.value,
       email: email.value,
       rg: rg.value || null,
-      phone: phone.value || null
+      phone: phone.value || null,
+      addresses: addresses.value.filter(addr => addr.street && addr.number)
     }
 
     if (isEditMode.value && props.customer) {
@@ -76,11 +95,12 @@ const clearForm = () => {
   email.value = ''
   rg.value = ''
   phone.value = ''
+  addresses.value = []
   error.value = ''
-  isEditMode.value = false
 }
 
 const handleClose = () => {
+  clearForm()
   emit('close')
 }
 </script>
@@ -167,6 +187,145 @@ const handleClose = () => {
               placeholder="(00) 00000-0000"
               maxlength="20"
             />
+          </div>
+
+          <div class="slide-in__section">
+            <div class="slide-in__section-header">
+              <h3 class="slide-in__section-title">Endereços</h3>
+              <button type="button" class="btn btn--small btn--primary" @click="addAddress" :disabled="loading">
+                + Adicionar
+              </button>
+            </div>
+
+            <div v-if="addresses.length === 0" class="slide-in__empty">
+              Nenhum endereço cadastrado
+            </div>
+
+            <div v-for="(address, index) in addresses" :key="index" class="address-card">
+              <div class="address-card__header">
+                <span class="address-card__title">Endereço {{ index + 1 }}</span>
+                <button type="button" class="address-card__remove" @click="removeAddress(index)" :disabled="loading">
+                  &times;
+                </button>
+              </div>
+
+              <div class="address-card__fields">
+                <div class="slide-in__field">
+                  <label class="slide-in__label">CEP *</label>
+                  <input 
+                    type="text" 
+                    class="slide-in__input" 
+                    v-model="address.zipCode" 
+                    required 
+                    :disabled="loading"
+                    placeholder="00000-000"
+                    maxlength="9"
+                  />
+                </div>
+
+                <div class="slide-in__field">
+                  <label class="slide-in__label">Rua *</label>
+                  <input 
+                    type="text" 
+                    class="slide-in__input" 
+                    v-model="address.street" 
+                    required 
+                    :disabled="loading"
+                    maxlength="255"
+                  />
+                </div>
+
+                <div class="slide-in__row">
+                  <div class="slide-in__field slide-in__field--small">
+                    <label class="slide-in__label">Número *</label>
+                    <input 
+                      type="text" 
+                      class="slide-in__input" 
+                      v-model="address.number" 
+                      required 
+                      :disabled="loading"
+                      maxlength="8"
+                    />
+                  </div>
+
+                  <div class="slide-in__field slide-in__field--grow">
+                    <label class="slide-in__label">Complemento</label>
+                    <input 
+                      type="text" 
+                      class="slide-in__input" 
+                      v-model="address.complement" 
+                      :disabled="loading"
+                      maxlength="255"
+                    />
+                  </div>
+                </div>
+
+                <div class="slide-in__field">
+                  <label class="slide-in__label">Bairro *</label>
+                  <input 
+                    type="text" 
+                    class="slide-in__input" 
+                    v-model="address.neighborhood" 
+                    required 
+                    :disabled="loading"
+                    maxlength="100"
+                  />
+                </div>
+
+                <div class="slide-in__row">
+                  <div class="slide-in__field slide-in__field--grow">
+                    <label class="slide-in__label">Cidade *</label>
+                    <input 
+                      type="text" 
+                      class="slide-in__input" 
+                      v-model="address.city" 
+                      required 
+                      :disabled="loading"
+                      maxlength="50"
+                    />
+                  </div>
+
+                  <div class="slide-in__field slide-in__field--small">
+                    <label class="slide-in__label">UF *</label>
+                    <select 
+                      class="slide-in__input" 
+                      v-model="address.state" 
+                      required 
+                      :disabled="loading"
+                    >
+                      <option value="">-</option>
+                      <option value="AC">AC</option>
+                      <option value="AL">AL</option>
+                      <option value="AP">AP</option>
+                      <option value="AM">AM</option>
+                      <option value="BA">BA</option>
+                      <option value="CE">CE</option>
+                      <option value="DF">DF</option>
+                      <option value="ES">ES</option>
+                      <option value="GO">GO</option>
+                      <option value="MA">MA</option>
+                      <option value="MT">MT</option>
+                      <option value="MS">MS</option>
+                      <option value="MG">MG</option>
+                      <option value="PA">PA</option>
+                      <option value="PB">PB</option>
+                      <option value="PR">PR</option>
+                      <option value="PE">PE</option>
+                      <option value="PI">PI</option>
+                      <option value="RJ">RJ</option>
+                      <option value="RN">RN</option>
+                      <option value="RS">RS</option>
+                      <option value="RO">RO</option>
+                      <option value="RR">RR</option>
+                      <option value="SC">SC</option>
+                      <option value="SP">SP</option>
+                      <option value="SE">SE</option>
+                      <option value="TO">TO</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="slide-in__actions">
@@ -304,6 +463,106 @@ const handleClose = () => {
     display: flex;
     gap: 12px;
     justify-content: flex-end;
+  }
+
+  &__section {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--color-border);
+  }
+
+  &__section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  &__section-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  &__empty {
+    padding: 24px;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 14px;
+    background-color: var(--color-bg-secondary);
+    border-radius: 4px;
+  }
+
+  &__row {
+    display: flex;
+    gap: 12px;
+  }
+
+  &__field--small {
+    flex: 0 0 100px;
+  }
+
+  &__field--grow {
+    flex: 1;
+  }
+}
+
+.address-card {
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  &__title {
+    font-weight: 600;
+    color: var(--color-text);
+    font-size: 14px;
+  }
+
+  &__remove {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--color-danger);
+    padding: 0;
+    line-height: 1;
+    transition: opacity 0.2s;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      opacity: 0.7;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+
+  &__fields {
+    .slide-in__field {
+      margin-bottom: 16px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
   }
 }
 
