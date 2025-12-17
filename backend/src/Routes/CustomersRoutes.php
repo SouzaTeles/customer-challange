@@ -42,7 +42,9 @@ class CustomersRoutes implements RoutesInterface
                     $id = $this->getNumericId($segment);
                     return $this->controller->getById($id);
                 }
-                return $this->controller->get();
+                $queryParams = $request->getQueryParams();
+                $search = $queryParams['search'] ?? null;
+                return $this->controller->get($search);
             case HttpMethod::POST:
                 if ($segment) {
                     throw new NotFoundException();

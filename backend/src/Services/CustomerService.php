@@ -27,6 +27,12 @@ class CustomerService
         return array_map(fn($customer) => $customer->toArray(), $customers);
     }
 
+    public function search(string $term): array
+    {
+        $customers = $this->customerRepository->search($term);
+        return array_map(fn($customer) => $customer->toArray(), $customers);
+    }
+
     public function create(array $data): Customer
     {
         $customer = Customer::fromArray($data);

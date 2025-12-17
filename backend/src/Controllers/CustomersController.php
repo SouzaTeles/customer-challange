@@ -17,9 +17,11 @@ final class CustomersController
         $this->service = $service;
     }
 
-    public function get(): Response
+    public function get(?string $search = null): Response
     {
-        $customers = $this->service->getAll();
+        $customers = $search 
+            ? $this->service->search($search)
+            : $this->service->getAll();
         return Response::json($customers);
     }
 

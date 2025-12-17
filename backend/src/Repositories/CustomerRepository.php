@@ -75,6 +75,23 @@ class CustomerRepository extends Repository
         return array_map(fn($row) => Customer::fromArray($row), $rows);
     }
 
+    public function search(string $term): array
+    {
+        $searchTerm = "%{$term}%";
+        
+        $sql = "SELECT * FROM {$this->table} 
+                WHERE name LIKE :term 
+                OR email LIKE :term 
+                OR cpf LIKE :term
+                ORDER BY name ASC";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['term' => $searchTerm]);
+        $rows = $stmt->fetchAll();
+        
+        return array_map(fn($row) => Customer::fromArray($row), $rows);
+    }
+
     protected function handleDuplicateEntry(string $message): void
     {
         if (str_contains($message, self::CONSTRAINT_UNIQUE_EMAIL)) {
