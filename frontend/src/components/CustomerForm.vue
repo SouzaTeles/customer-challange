@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { getErrorMessage } from '@/utils/errorHandler.js'
 import { customerService } from '@/services/customer.js'
 
@@ -7,6 +7,10 @@ const props = defineProps({
   show: {
     type: Boolean,
     required: true
+  },
+  customer: {
+    type: Object,
+    default: null
   }
 })
 
@@ -21,36 +25,51 @@ const phone = ref('')
 const loading = ref(false)
 const error = ref('')
 
+const isEditMode = computed(() => !!props.customer)
+
+watch(() => props.customer, (customer) => {
+  if (customer) {
+    name.value = customer.name || ''
+    cpf.value = customer.cpf || ''
+    birthDate.value = customer.birthDate || ''
+    email.value = customer.email || ''
+    rg.value = customer.rg || ''
+    phone.value = customer.phone || ''
+  }
+}, { immediate: true })
+
 const handleSubmit = async () => {
   error.value = ''
   loading.value = true
   
   try {
-    await customerService.create({
+    const customerData = {
       name: name.value,
       cpf: cpf.value.replace(/\D/g, ''), // Remove formatação
       birthDate: birthDate.value,
       email: email.value,
       rg: rg.value || null,
       phone: phone.value || null
-    })
+    }
+
+    if (isEditMode.value && props.customer) {
+      await customerService.update(props.customer.id, customerData)
+    } else {
+      await customerService.create(customerData)
+    }
     
-    name.value = ''
-    cpf.value = ''
-    birthDate.value = ''
-    email.value = ''
-    rg.value = ''
-    phone.value = ''
+    clearForm()
     emit('saved')
     emit('close')
   } catch (e) {
-    error.value = getErrorMessage(e, 'Erro ao cadastrar cliente')
+    const action = isEditMode.value ? 'atualizar' : 'cadastrar'
+    error.value = getErrorMessage(e, `Erro ao ${action} cliente`)
   } finally {
     loading.value = false
   }
 }
 
-const handleClose = () => {
+const clearForm = () => {
   name.value = ''
   cpf.value = ''
   birthDate.value = ''
@@ -58,6 +77,10 @@ const handleClose = () => {
   rg.value = ''
   phone.value = ''
   error.value = ''
+  isEditMode.value = false
+}
+
+const handleClose = () => {
   emit('close')
 }
 </script>
@@ -68,7 +91,7 @@ const handleClose = () => {
       <div class="slide-in__overlay" @click="handleClose"></div>
       <div class="slide-in__panel">
         <div class="slide-in__header">
-          <h2 class="slide-in__title">Novo Cliente</h2>
+          <h2 class="slide-in__title">{{ isEditMode ? 'Editar Cliente' : 'Novo Cliente' }}</h2>
           <button class="slide-in__close" @click="handleClose">&times;</button>
         </div>
 
@@ -151,7 +174,7 @@ const handleClose = () => {
               Cancelar
             </button>
             <button type="submit" class="btn btn--primary" :disabled="loading">
-              {{ loading ? 'Salvando...' : 'Salvar' }}
+              {{ loading ? 'Salvando...' : (isEditMode ? 'Atualizar' : 'Salvar') }}
             </button>
           </div>
         </form>

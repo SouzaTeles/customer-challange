@@ -10,6 +10,7 @@ const customers = ref([])
 const loading = ref(false)
 const searchTerm = ref('')
 const showCustomerForm = ref(false)
+const customerToEdit = ref(null)
 const showDeleteModal = ref(false)
 const customerToDelete = ref(null)
 const deleteError = ref('')
@@ -27,7 +28,18 @@ const fetchCustomers = async () => {
 }
 
 const handleCustomerSaved = () => {
+  customerToEdit.value = null
   fetchCustomers()
+}
+
+const openEditForm = (customer) => {
+  customerToEdit.value = customer
+  showCustomerForm.value = true
+}
+
+const closeCustomerForm = () => {
+  showCustomerForm.value = false
+  customerToEdit.value = null
 }
 
 const openDeleteModal = (customer) => {
@@ -101,7 +113,7 @@ onMounted(() => {
                 <td>{{ customer.name }}</td>
                 <td>{{ customer.email }}</td>
                 <td>
-                  <button class="btn btn--icon">Editar</button>
+                  <button class="btn btn--icon" @click="openEditForm(customer)">Editar</button>
                   <button class="btn btn--icon btn--danger" @click="openDeleteModal(customer)">Excluir</button>
                 </td>
               </tr>
@@ -112,8 +124,9 @@ onMounted(() => {
     </main>
 
     <CustomerForm 
-      :show="showCustomerForm" 
-      @close="showCustomerForm = false"
+      :show="showCustomerForm"
+      :customer="customerToEdit"
+      @close="closeCustomerForm"
       @saved="handleCustomerSaved"
     />
 
