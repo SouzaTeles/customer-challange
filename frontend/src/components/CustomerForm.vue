@@ -1,7 +1,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { isValidCPF } from 'cnpj-cpf-validator'
 import { getErrorMessage } from '@/utils/errorHandler.js'
 import { customerService } from '@/services/customer.js'
+
 
 const props = defineProps({
   show: {
@@ -25,57 +27,115 @@ const phone = ref('')
 const addresses = ref([])
 const loading = ref(false)
 const error = ref('')
+const cpfInvalid = ref(false)
+const formRef = ref(null)
 
 const isEditMode = computed(() => !!props.customer)
 
+const normalizeAddress = (addr) => ({
+  street: addr.street || '',
+  number: addr.number || '',
+  complement: addr.complement || '',
+  neighborhood: addr.neighborhood || '',
+  zipCode: addr.zipCode || '',
+  city: addr.city || '',
+  state: addr.state || ''
+})
+
+const createEmptyAddress = () => ({
+  street: '',
+  number: '',
+  complement: '',
+  neighborhood: '',
+  zipCode: '',
+  city: '',
+  state: ''
+})
+
+const populateForm = (customer) => {
+  name.value = customer.name || ''
+  cpf.value = customer.cpf || ''
+  birthDate.value = customer.birthDate || ''
+  email.value = customer.email || ''
+  rg.value = customer.rg || ''
+  phone.value = customer.phone || ''
+  addresses.value = (customer.addresses || []).map(normalizeAddress)
+}
+
 watch(() => props.customer, (customer) => {
   if (customer) {
-    name.value = customer.name || ''
-    cpf.value = customer.cpf || ''
-    birthDate.value = customer.birthDate || ''
-    email.value = customer.email || ''
-    rg.value = customer.rg || ''
-    phone.value = customer.phone || ''
-    addresses.value = customer.addresses || []
+    populateForm(customer)
   }
 }, { immediate: true })
 
 const addAddress = () => {
-  addresses.value.push({
-    street: '',
-    number: '',
-    complement: '',
-    neighborhood: '',
-    zipCode: '',
-    city: '',
-    state: ''
-  })
+  addresses.value.push(createEmptyAddress())
 }
 
 const removeAddress = (index) => {
   addresses.value.splice(index, 1)
 }
 
+const removeMask = (value) => value ? value.replace(/\D/g, '') : ''
+
+const showValidationError = (message) => {
+  error.value = message
+  cpfInvalid.value = true
+  loading.value = false
+  
+  if (formRef.value) {
+    formRef.value.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
+
+const validateCPF = () => {
+  const cleanCpf = removeMask(cpf.value)
+  
+  if (!isValidCPF(cleanCpf)) {
+    showValidationError('CPF inválido')
+    return null
+  }
+  
+  return cleanCpf
+}
+
+const prepareAddresses = () => {
+  return addresses.value
+    .filter(addr => addr.street && addr.number)
+    .map(addr => ({
+      ...addr,
+      zipCode: removeMask(addr.zipCode)
+    }))
+}
+
+const buildCustomerData = (cleanCpf) => ({
+  name: name.value,
+  cpf: cleanCpf,
+  birthDate: birthDate.value,
+  email: email.value,
+  rg: rg.value || null,
+  phone: removeMask(phone.value) || null,
+  addresses: prepareAddresses()
+})
+
+const saveCustomer = async (customerData) => {
+  if (isEditMode.value && props.customer) {
+    return await customerService.update(props.customer.id, customerData)
+  }
+  return await customerService.create(customerData)
+}
+
 const handleSubmit = async () => {
   error.value = ''
+  cpfInvalid.value = false
   loading.value = true
   
   try {
-    const customerData = {
-      name: name.value,
-      cpf: cpf.value.replace(/\D/g, ''), // Remove formatação
-      birthDate: birthDate.value,
-      email: email.value,
-      rg: rg.value || null,
-      phone: phone.value || null,
-      addresses: addresses.value.filter(addr => addr.street && addr.number)
-    }
-
-    if (isEditMode.value && props.customer) {
-      await customerService.update(props.customer.id, customerData)
-    } else {
-      await customerService.create(customerData)
-    }
+    const cleanCpf = validateCPF()
+    if (!cleanCpf) return
+    
+    const customerData = buildCustomerData(cleanCpf)
+    await saveCustomer(customerData)
     
     clearForm()
     emit('saved')
@@ -97,6 +157,7 @@ const clearForm = () => {
   phone.value = ''
   addresses.value = []
   error.value = ''
+  cpfInvalid.value = false
 }
 
 const handleClose = () => {
@@ -115,7 +176,7 @@ const handleClose = () => {
           <button class="slide-in__close" @click="handleClose">&times;</button>
         </div>
 
-        <form class="slide-in__form" @submit.prevent="handleSubmit">
+        <form ref="formRef" class="slide-in__form" @submit.prevent="handleSubmit">
           <div v-if="error" class="slide-in__error">{{ error }}</div>
 
           <div class="slide-in__field">
@@ -134,8 +195,9 @@ const handleClose = () => {
             <label class="slide-in__label">CPF *</label>
             <input 
               type="text" 
-              class="slide-in__input" 
+              :class="['slide-in__input', { 'slide-in__input--error': cpfInvalid }]" 
               v-model="cpf" 
+              v-mask="'###.###.###-##'"
               required 
               :disabled="loading"
               placeholder="000.000.000-00"
@@ -183,9 +245,10 @@ const handleClose = () => {
               type="tel" 
               class="slide-in__input" 
               v-model="phone" 
+              v-mask="'(##) #####-####'"
               :disabled="loading"
               placeholder="(00) 00000-0000"
-              maxlength="20"
+              maxlength="15"
             />
           </div>
 
@@ -216,6 +279,7 @@ const handleClose = () => {
                     type="text" 
                     class="slide-in__input" 
                     v-model="address.zipCode" 
+                    v-mask="'#####-###'"
                     required 
                     :disabled="loading"
                     placeholder="00000-000"
@@ -454,6 +518,14 @@ const handleClose = () => {
     &:disabled {
       background-color: var(--color-bg-secondary);
       cursor: not-allowed;
+    }
+
+    &--error {
+      border-color: var(--color-danger);
+      
+      &:focus {
+        border-color: var(--color-danger);
+      }
     }
   }
 

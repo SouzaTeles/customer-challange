@@ -9,7 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@devindex/vue-mask": "^2.0.3",
     "axios": "^1.13.2",
+    "cnpj-cpf-validator": "^1.0.4",
     "reset-css": "^5.0.2",
     "sass-embedded": "^1.96.0",
     "vue": "^3.5.24",
