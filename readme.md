@@ -35,19 +35,20 @@ docker-compose exec php ./vendor/bin/phpunit
 
 **Clientes:** (requer autenticação)
 - `GET /api/customers` - Listar todos
+- `GET /api/customers?search=termo` - Buscar por nome, email ou CPF
 - `GET /api/customers/:id` - Buscar por ID
 - `POST /api/customers` - Criar (com endereços)
-- `PUT /api/customers/:id` - Atualizar (substitui tudo)
+- `PUT /api/customers/:id` - Atualizar (substitui tudo, incluindo endereços)
 - `DELETE /api/customers/:id` - Deletar (cascata nos endereços)
 
 **Exemplo de body para criar/atualizar cliente:**
 ```json
 {
-  "name": "Souza Teles",
+  "name": "Lucas Teles",
   "cpf": "12345678901",
   "email": "email@example.com",
   "birthDate": "1990-05-15",
-  "rg": "MG-12.345.678",
+  "rg": "MG12345678",
   "phone": "31999990000",
   "addresses": [
     {
@@ -55,7 +56,7 @@ docker-compose exec php ./vendor/bin/phpunit
       "number": "123",
       "complement": "Apto 101",
       "neighborhood": "Centro",
-      "zipCode": "30000-000",
+      "zipCode": "30000000",
       "city": "Teresópolis",
       "state": "RJ"
     }
@@ -76,14 +77,35 @@ docker-compose exec php ./vendor/bin/phpunit
 
 ## Decisões técnicas
 
-- **Autenticação:** Baseado em sessão (cookies httpOnly)
+### Backend
+- **Autenticação:** Baseada em sessão (cookies httpOnly)
 - **Senhas:** Hash com Argon2ID
 - **Relacionamentos:** Customer 1:N Address com ON DELETE CASCADE. Porém, removeria as constraints de relacionamento em produção por questão de desempenho
 - **Router próprio:** Sem framework, controle total do ciclo de requisição
 - **Injeção de dependência:** Manual via construtores
+- **Segurança no banco:** Prepared Statements (PDO) protegem contra SQL injection
+
+### Frontend
+- **Composition API:** Vue 3 com `<script setup>`
+- **Máscaras:** `@devindex/vue-mask` para CPF, telefone e CEP
+- **Validação:** `cnpj-cpf-validator` para validação de CPF
+- **Estilização:** SCSS com BEM naming e CSS variables
+- **Build:** Vite para build de produção, servido pelo Nginx
+
+## Funcionalidades Implementadas
+
+- CRUD completo de clientes
+- Gerenciamento de múltiplos endereços por cliente
+- Busca por nome, email ou CPF
+- Validação de CPF no frontend
+- Máscaras de input (CPF, telefone, CEP)
+- Modal de confirmação para exclusão
+- Feedback visual de erros
+- Autenticação com sessão
 
 ## A fazer
 
-- Validação de dados (CPF, email, CEP)
 - Paginação na listagem
 - Rate limiting no login
+- Validação de email e CEP no backend
+- Testes de unidade
